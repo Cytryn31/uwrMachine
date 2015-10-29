@@ -1,55 +1,41 @@
-print(__doc__)
-
-
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn import datasets, svm
+from sklearn import datasets
+import SVM.classifySVM as cSVM
+import Data.prep_terrain_data as prep_terrain_data
+from sklearn.metrics import classification_report
+from sklearn.metrics import precision_score
+from sklearn.metrics import recall_score
+from sklearn.metrics import f1_score
+from sklearn.externals import joblib
 
-iris = datasets.load_iris()
-X = iris.data
-y = iris.target
-
-X = X[y != 0, :2]
-y = y[y != 0]
-
-n_sample = len(X)
-
-np.random.seed(0)
-order = np.random.permutation(n_sample)
-X = X[order]
-y = y[order].astype(np.float)
-
-X_train = X[:.9 * n_sample]
-y_train = y[:.9 * n_sample]
-X_test = X[.9 * n_sample:]
-y_test = y[.9 * n_sample:]
+features_train, labels_train, features_test, labels_test = prep_terrain_data.makeTerrainData()
 
 # fit the model
-for fig_num, kernel in enumerate(('linear', 'rbf', 'poly')):
-    clf = svm.SVC(kernel=kernel, gamma=10)
-    clf.fit(X_train, y_train)
 
-    plt.figure(fig_num)
-    plt.clf()
-    plt.scatter(X[:, 0], X[:, 1], c=y, zorder=10, cmap=plt.cm.Paired)
+clf = cSVM.getLinearSupportVectorClassifier()
+clf.fit(features_train, labels_train)
 
-    # Circle out the test data
-    plt.scatter(X_test[:, 0], X_test[:, 1], s=80, facecolors='none', zorder=10)
+pred = clf.predict(features_test)
 
-    plt.axis('tight')
-    x_min = X[:, 0].min()
-    x_max = X[:, 0].max()
-    y_min = X[:, 1].min()
-    y_max = X[:, 1].max()
+from sklearn.metrics import accuracy_score
+#acc = accuracy_score(pred, labels_test)
+#print (" accuracy: ", acc)
 
-    XX, YY = np.mgrid[x_min:x_max:200j, y_min:y_max:200j]
-    Z = clf.decision_function(np.c_[XX.ravel(), YY.ravel()])
+print(classification_report(labels_test, pred))
+#precision = precision_score(labels_test, pred)
+#print (" precision: ", precision)
 
-    # Put the result into a color plot
-    Z = Z.reshape(XX.shape)
-    plt.pcolormesh(XX, YY, Z > 0, cmap=plt.cm.Paired)
-    plt.contour(XX, YY, Z, colors=['k', 'k', 'k'], linestyles=['--', '-', '--'],
-                levels=[-.5, 0, .5])
+#recall = recall_score(labels_test, pred)
+#print (" recall: ", recall)
 
-    plt.title(kernel)
-plt.show()
+#f1 = f1_score(labels_test, pred)
+#print (" f1: ", f1)
+
+import pickle
+s = pickle.dumps(clf)
+print (" dumps: ", s)
+print (" len: ", len(s))
+clf2 = pickle.loads(s)
+
+print(classification_report(labels_test, clf2.predict(features_test)))
