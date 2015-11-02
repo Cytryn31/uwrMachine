@@ -1,29 +1,53 @@
 import urllib.request
 import json
 
-X = [[]]
+X = []
 Y = []
+wordsArray = []
+opinionArray = []
+maxWord = 25939
+Xcnt = 0
 
-# for n in range(1, 3) - '3' zmieniamy na liczbe postow. obecnie 2772 i lecimy po wszystkich
-for n in range(1, 3):
-    url = "http://naos-software.com/dataprocessing/rest-api/resultDocuments/"+str(n)
+url = "http://naos-software.com/dataprocessing/rest-api/resultDocuments"
+response = urllib.request.urlopen(url)
+content = response.read()
+data = json.loads(content.decode("utf8"))
+
+Page = data['page']
+totalPages = Page['totalPages']
+
+for p in range(0, totalPages):
+    url = "http://naos-software.com/dataprocessing/rest-api/resultDocuments?page="+str(p)
     response = urllib.request.urlopen(url)
     content = response.read()
     data = json.loads(content.decode("utf8"))
 
-    arrayResult = data['result'].split(" ")
-    l = len(arrayResult)
+    content = data['_embedded']
+    resultDocuments = content['resultDocuments']
 
-    for i in range(1, l):
-        tmp = arrayResult[i].split(":")
-        if(tmp[0] == str(i)):
-            X[n-1].append(tmp[1])
-        else:
-            X[n-1].append('0')
+    for document in resultDocuments:
+        tmpArr = document['result'].split(" ")
+        Y.append(tmpArr[0])
+        X.append(['0'])
+        countWords = 1
+        for i in range(1, len(tmpArr)):
+            word = tmpArr[i].split(":")
+            stop = 0
+            while (stop == 0):
+                if(int(word[0]) != countWords):
+                    X[Xcnt].append('0')
+                else:
+                    X[Xcnt].append(word[1])
+                    stop = 1
+                countWords += 1
 
-    Y.append(arrayResult[0])
-    X.append([])
+        while countWords < maxWord:
+             X[Xcnt].append('0')
+             countWords += 1
 
-print (X)
-print (Y)
+        Xcnt +=1
+
+
+
+
 
