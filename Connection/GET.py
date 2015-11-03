@@ -1,6 +1,7 @@
 import urllib.request
 import json
-
+import numpy as np
+from sklearn.cross_validation import train_test_split
 def getArrays():
     X = []
     Y = []
@@ -47,8 +48,12 @@ def getArrays():
                  countWords += 1
 
             Xcnt +=1
+# Split into training and test
 
-    return X,Y
+    random_state = np.random.RandomState(0)
+    X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=.5,
+                                                    random_state=random_state)
+    return X_train, X_test, y_train, y_test
 
 
 

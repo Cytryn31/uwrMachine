@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn import datasets
 import SVM.classifySVM as cSVM
+import Connection.GET as wtf
 import Data.prep_terrain_data as prep_terrain_data
 from sklearn.metrics import classification_report
 from sklearn.metrics import precision_score
@@ -9,7 +10,10 @@ from sklearn.metrics import recall_score
 from sklearn.metrics import f1_score
 from sklearn.externals import joblib
 
-features_train, labels_train, features_test, labels_test = prep_terrain_data.makeTerrainData()
+features_train, labels_train, features_test, labels_test = wtf.getArrays()
+print (features_train[0])
+print (labels_train[0])
+#features_train, labels_train, features_test, labels_test = prep_terrain_data.makeTerrainData()
 
 # fit the model
 
