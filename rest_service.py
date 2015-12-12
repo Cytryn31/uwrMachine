@@ -4,6 +4,7 @@ import classifier
 import numpy as np
 import Connection.POST as post
 import pickle
+import Connection.PUT as put
 
 @route('/hello', method = 'GET')
 def hello():
@@ -39,11 +40,15 @@ def test():
     clf = pickle.loads(classfier_dump)
     preditions, accuracy, recall, precision = classifier.test(clf = clf, features = features_train, labels = labels_train)
 
-    data1 = test_data_to_send(classfier_name, accuracy, recall, precision)
-    post.send("http://naos-software.com/dataprocessing/rest-api","/resultTestClassifiers","",data1)
+    data1 = test_data_to_send(1, 1, 1)
+    post.send("http://naos-software.com/dataprocessing/rest-api/resultTestClassifiers",data1)
 
-    data2 = preds_to_send(classfier_name, preditions)
-    post.send("http://naos-software.com/dataprocessing/rest-api","/annotations","",data2)
+    data2 = preds_to_send(2, 2, -5, 5)
+    post.send("http://naos-software.com/dataprocessing/rest-api/annotations",data2)
+
+    data3 = classfier_to_send(2, 2, "test")
+    put.send("http://naos-software.com/dataprocessing/rest-api/classifiers/",id,data3)
+
 
     return data1+data2
 
@@ -51,13 +56,34 @@ run(host='localhost', port=8080)
 
 
 
+#w classifiers nie tworzycie go wy tylko grupa od api
+#wy robicie update dopisujac do niego learningCurve, content i zmieniac flag,
+#resultTestClassifiers tworzycie wy od nowa,
+#musicie uzupelnic classifierId, vectoriziedDocumentCollectionId, parameter
+#a te pola mozecia a nie musiscie (moga miec NULL): precision accuracy, recall
 
-def classfier_to_send(classfier_name, clf, train_sizes, train_scores, test_scores, status):
-    clf_string = pickle.dumps(clf)
-    return "data"
+def classfier_to_send(learningCurve, content, flag):
+    data ={
+        "learningCurve" : learningCurve,
+        "content" : content,
+        "flag" : flag
+    }
+    return data
 
-def test_data_to_send(classfier_name, accuracy, recall, precision):
-    return "data"
+def preds_to_send(questionId, documentId, value, range):
+    data ={
+        "userId" : "2",
+        "questionId" : questionId,
+        "documentId" : documentId,
+        "value" : value,
+        "range" : range,
+    }
+    return data
 
-def preds_to_send(classfier_name, preds):
-    return "data"
+def test_data_to_send(classifierId, vectoriziedDocumentCollectionId, parameter):
+    data ={
+        "classifierId" : classifierId,
+        "vectoriziedDocumentCollectionId" : vectoriziedDocumentCollectionId,
+        "parameter" : parameter
+    }
+    return data
